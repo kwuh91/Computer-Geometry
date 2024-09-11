@@ -99,7 +99,7 @@ function main2(): void {
             // drawRectangles(ctx, canvas.width, canvas.height, canvas.width - 10.1, canvas.height - 5.1);
 
             drawRectangles(ctx, canvas.width, canvas.height);           // windows preset 1900x918
-            drawRectangles(ctx, canvas.width, canvas.height, 225, 87.5) // mac     preset 1425x803
+            // drawRectangles(ctx, canvas.width, canvas.height, 225, 87.5) // mac     preset 1425x803
 
         } else {
             console.error("Failed to get the 2D rendering context");
