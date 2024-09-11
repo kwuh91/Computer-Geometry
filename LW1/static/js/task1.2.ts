@@ -1,5 +1,3 @@
-// 01.js
-
 "use strict";
 
 function myGradientRectangle(ctx:    CanvasRenderingContext2D | null, 
@@ -78,13 +76,15 @@ function main2(): void {
 	const canvas = document.getElementById(
 		"mycanvas"
 	) as HTMLCanvasElement | null;
-	console.assert(canvas, "Failed to retrieve the <canvas> element");
+	// console.assert(canvas, "Failed to retrieve the <canvas> element");
 
     if (canvas) {
 
         // Set the canvas width and height to fill the whole screen
-        canvas.width  = window.innerWidth * 0.99;
+        canvas.width  = window.innerWidth  * 0.99;
         canvas.height = window.innerHeight * 0.98;
+
+        console.log(canvas.width, canvas.height)
 
 		// Get the rendering context for 2DCG
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -98,7 +98,8 @@ function main2(): void {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             // drawRectangles(ctx, canvas.width, canvas.height, canvas.width - 10.1, canvas.height - 5.1);
 
-            drawRectangles(ctx, canvas.width, canvas.height);
+            drawRectangles(ctx, canvas.width, canvas.height);           // windows preset 1900x918
+            drawRectangles(ctx, canvas.width, canvas.height, 225, 87.5) // mac     preset 1425x803
 
         } else {
             console.error("Failed to get the 2D rendering context");
