@@ -1,12 +1,13 @@
 "use strict";
 
-function myGradientRectangle(ctx:    CanvasRenderingContext2D | null, 
-                             x0:     number, 
-                             y0:     number, 
-                             width:  number, 
-                             height: number,
-                             color1: string = 'red',
-                             color2: string = 'green'): void {
+function myGradientRectangle(ctx:         CanvasRenderingContext2D | null, 
+                             x0:          number, 
+                             y0:          number, 
+                             width:       number, 
+                             height:      number,
+                             color1:      string  = 'red',
+                             color2:      string  = 'green',
+                             applyShadow: boolean = false): void {
 
     const gx0: number = x0;
 	const gy0: number = y0;
@@ -14,8 +15,8 @@ function myGradientRectangle(ctx:    CanvasRenderingContext2D | null,
 	const gy1: number = y0 + height;
     
     if (ctx) {
-        const old_fillStyle:   string | CanvasGradient | CanvasPattern = ctx.fillStyle
-        const old_strokeStyle: string | CanvasGradient | CanvasPattern = ctx.strokeStyle
+        const old_fillStyle:   string | CanvasGradient | CanvasPattern = ctx.fillStyle;
+        const old_strokeStyle: string | CanvasGradient | CanvasPattern = ctx.strokeStyle;
 
         const gradient: CanvasGradient = ctx.createLinearGradient(gx0, gy0, gx1, gy1);
 
@@ -25,7 +26,14 @@ function myGradientRectangle(ctx:    CanvasRenderingContext2D | null,
         ctx.fillStyle   = gradient;
         ctx.strokeStyle = gradient;
 
-        ctx.fillRect(x0, y0, width, height)
+        if (applyShadow) {
+            ctx.shadowOffsetX = Math.random() * 10 * (Math.floor(Math.random() * 10) % 2) ? -1 : 1; 
+            ctx.shadowOffsetY = Math.random() * 10 * (Math.floor(Math.random() * 10) % 2) ? -1 : 1; 
+            ctx.shadowBlur    = Math.random() * 100;
+            ctx.shadowColor   = getRandomColor();
+        }
+
+        ctx.fillRect(x0, y0, width, height);
 
         ctx.fillStyle   = old_fillStyle;
         ctx.strokeStyle = old_strokeStyle;   
@@ -44,34 +52,32 @@ function getRandomColor(): string {
 function drawRectangles(ctx:          CanvasRenderingContext2D | null, 
                         canvasWidth:  number, 
                         canvasHeight: number,
-                        rectWidth:    number = 300,
-                        rectHeight:   number = 100,): void {
+                        rectWidth:    number  = 300,
+                        rectHeight:   number  = 100,
+                        applyShadow:  boolean = false): void {
 
-            // const width:  number = 300 
-            // const height: number = 100
+            const spaceInBetweenVertically:   number = rectHeight * 0.1;
+            const spaceInBetweenHorizontally: number = spaceInBetweenVertically;
 
-            const spaceInBetweenVertically:   number = rectHeight * 0.1
-            const spaceInBetweenHorizontally: number = rectWidth  * 0
-
-            const heightRange:         number = canvasHeight - rectHeight
-            const maxAmountVertically: number = Math.floor(canvasHeight / (rectHeight + spaceInBetweenVertically))
+            const heightRange:         number = canvasHeight - rectHeight;
+            const maxAmountVertically: number = Math.floor(canvasHeight / (rectHeight + spaceInBetweenVertically));
             
-            const widthRange:            number = canvasWidth - rectWidth
-            const maxAmountHorizontally: number = Math.floor(canvasWidth / (rectWidth + spaceInBetweenHorizontally))
+            const widthRange:            number = canvasWidth - rectWidth;
+            const maxAmountHorizontally: number = Math.floor(canvasWidth / (rectWidth + spaceInBetweenHorizontally));
 
-            for (let x0 = 10; x0 < widthRange; x0 += canvasWidth / maxAmountHorizontally){
-                for (let y0 = 5; y0 < heightRange; y0 += canvasHeight / maxAmountVertically) { 
-                    const randomColor1: string = getRandomColor()
-                    const randomColor2: string = getRandomColor()
+            for (let x0 = spaceInBetweenVertically; x0 < widthRange; x0 += canvasWidth / maxAmountHorizontally){
+                for (let y0 = spaceInBetweenVertically; y0 < heightRange; y0 += canvasHeight / maxAmountVertically) { 
+                    const randomColor1: string = getRandomColor();
+                    const randomColor2: string = getRandomColor();
 
-                    myGradientRectangle(ctx, x0, y0, rectWidth, rectHeight, randomColor1, randomColor2); 
+                    myGradientRectangle(ctx, x0, y0, rectWidth, rectHeight, randomColor1, randomColor2, applyShadow); 
                 }
             }
 
 
 }
 
-function main2(): void {
+function main2(applyShadow: boolean = false): void {
 	// Retrieve <canvas> element
 	const canvas = document.getElementById(
 		"mycanvas"
@@ -84,7 +90,7 @@ function main2(): void {
         canvas.width  = window.innerWidth  * 0.99;
         canvas.height = window.innerHeight * 0.98;
 
-        console.log(canvas.width, canvas.height)
+        // console.log(canvas.width, canvas.height);
 
 		// Get the rendering context for 2DCG
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -96,10 +102,9 @@ function main2(): void {
             // fill the background
             ctx.fillStyle = 'black'
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // drawRectangles(ctx, canvas.width, canvas.height, canvas.width - 10.1, canvas.height - 5.1);
 
-            drawRectangles(ctx, canvas.width, canvas.height);           // windows preset 1900x918
-            // drawRectangles(ctx, canvas.width, canvas.height, 225, 87.5) // mac     preset 1425x803
+            drawRectangles(ctx, canvas.width, canvas.height, undefined, undefined, applyShadow); // windows preset 1900x918
+            // drawRectangles(ctx, canvas.width, canvas.height, 225, 87.5, applyShadow);         // mac     preset 1425x803
 
         } else {
             console.error("Failed to get the 2D rendering context");
@@ -107,4 +112,4 @@ function main2(): void {
     }
 }
 
-setInterval(main2, 100);
+// setInterval(main2, 100);
