@@ -2,7 +2,7 @@
 
 "use strict";
 
-function main() {
+function main1() {
 	// Retrieve <canvas> element
 	const canvas = document.getElementById("mycanvas");
 	console.assert(canvas, "Failed to retrieve the <canvas> element");
