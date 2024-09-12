@@ -56,28 +56,26 @@ function drawRectangles(ctx:          CanvasRenderingContext2D | null,
                         rectHeight:   number  = 100,
                         applyShadow:  boolean = false): void {
 
-            const spaceInBetweenVertically:   number = rectHeight * 0.1;
-            const spaceInBetweenHorizontally: number = spaceInBetweenVertically;
+    const spaceInBetweenVertically:   number = rectHeight * 0.1;
+    const spaceInBetweenHorizontally: number = spaceInBetweenVertically;
 
-            const heightRange:         number = canvasHeight - rectHeight;
-            const maxAmountVertically: number = Math.floor(canvasHeight / (rectHeight + spaceInBetweenVertically));
-            
-            const widthRange:            number = canvasWidth - rectWidth;
-            const maxAmountHorizontally: number = Math.floor(canvasWidth / (rectWidth + spaceInBetweenHorizontally));
+    const heightRange:         number = canvasHeight - rectHeight;
+    const maxAmountVertically: number = Math.floor(canvasHeight / (rectHeight + spaceInBetweenVertically));
+    
+    const widthRange:            number = canvasWidth - rectWidth;
+    const maxAmountHorizontally: number = Math.floor(canvasWidth / (rectWidth + spaceInBetweenHorizontally));
 
-            for (let x0 = spaceInBetweenVertically; x0 < widthRange; x0 += canvasWidth / maxAmountHorizontally){
-                for (let y0 = spaceInBetweenVertically; y0 < heightRange; y0 += canvasHeight / maxAmountVertically) { 
-                    const randomColor1: string = getRandomColor();
-                    const randomColor2: string = getRandomColor();
+    for (let x0 = spaceInBetweenVertically; x0 < widthRange; x0 += canvasWidth / maxAmountHorizontally){
+        for (let y0 = spaceInBetweenVertically; y0 < heightRange; y0 += canvasHeight / maxAmountVertically) { 
+            const randomColor1: string = getRandomColor();
+            const randomColor2: string = getRandomColor();
 
-                    myGradientRectangle(ctx, x0, y0, rectWidth, rectHeight, randomColor1, randomColor2, applyShadow); 
-                }
-            }
-
-
+            myGradientRectangle(ctx, x0, y0, rectWidth, rectHeight, randomColor1, randomColor2, applyShadow); 
+        }
+    }
 }
 
-function main2(applyShadow: boolean = false): void {
+function main2_3(applyShadow: boolean = false): void {
 	// Retrieve <canvas> element
 	const canvas = document.getElementById(
 		"mycanvas"
@@ -112,4 +110,4 @@ function main2(applyShadow: boolean = false): void {
     }
 }
 
-// setInterval(main2, 100);
+// setInterval(main2_3, 1000);
