@@ -1,5 +1,3 @@
-// 01.js
-
 "use strict";
 
 function main1() {
