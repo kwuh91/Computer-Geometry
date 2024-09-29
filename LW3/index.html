@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="static/css/style.css">
+    <title>Лабораторная работа №3</title>
+</head>
+ 
+  <body onload="main()">
+
+      <canvas class="mycanvas" id="mycanvas">
+          Your browser does not support the HTML5 canvas element.
+      </canvas>
+
+      <div class="controlPanel" id="controlPanel">
+        <h2 class="Text">Settings</h2>
+        <p class="Text">Speed</p>
+        <button class="smallButton" id="speed-plus">+</button>
+        <button class="smallButton" id="speed-minus">-</button>
+        <p class="Text">Radius</p>
+        <button class="smallButton" id="radius-plus">+</button>
+        <button class="smallButton" id="radius-minus">-</button>
+        <p class="Text">Color</p>
+        <button class="bigButton" id="randomize-color">?</button>
+      </div>
+
+      <div class="controlPanel2">
+        <h2 class="Text">Stats</h2>
+        <p id="speed" class="Text">speed: 5</p>
+        <p id="radius" class="Text">radius: 10</p>
+        <p id="color" class="Text">color: white</p>
+        <p id="direction" class="Text">direction: positive</p>
+        <p id="axis" class="Text">axis: x</p>
+      </div>
+
+      <div class="controlPanel3">
+        <h2 class="Text">Controls</h2>
+        <p class="Text">arrows: choose direction</p>
+        <p class="Text">space: stop/resume</p>
+        <p class="Text">1-9: set speed</p>
+        <p class="Text">z: slow down</p>
+        <p class="Text">x: speed up</p>
+        <p class="Text">c: decrease size</p>
+        <p class="Text">v: increase size</p>
+      </div>
+
+    <script src="static/js/ntc.js"></script>
+    <script src="static/js/main.js"></script>
+
+  </body>
+
+</html>

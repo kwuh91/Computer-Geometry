@@ -1,0 +1,90 @@
+/* body {
+    background-color: white;
+    font-family: "Cinzel", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+} */
+
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body {
+    background-color: black;
+    font-family: "Cinzel", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+}
+
+.controlPanel {
+    color: white;
+    width: 10vw;
+    height: 18.5vw;
+    border: 0.01vw solid white;
+    position: fixed;
+    top: 1vw;
+    right: 1vw;
+    text-align: center;
+    padding: 0.5vw;
+}
+  
+.controlPanel2 {
+    color: white;
+    width: 9vw;
+    height: 14vw;
+    border: 0.01vw solid white;
+    position: fixed;
+    top: 1vw;
+    right: 89vw;
+    text-align: center;
+    padding: 0.5vw;
+}
+
+.controlPanel3 {
+    color: white;
+    width: 10vw;
+    height: 19.2vw;
+    border: 0.01vw solid white;
+    position: fixed;
+    top: 27.5vw;
+    right: 1vw;
+    text-align: center;
+    padding: 0.5vw;
+}
+
+.controlPanel h2 {
+    margin-top: 1vw;
+}
+
+.controlPanel2 h2 {
+    margin-top: 1vw;
+}
+
+.controlPanel3 h2 {
+    margin-top: 1vw;
+}
+
+.smallButton {
+    width: 3vw;
+    height: 1.5vw;
+    background-color: black;
+    color: white;
+    border: 0.01vw solid white;
+    margin: 5px;
+}
+
+.bigButton {
+    width: 6.5vw;
+    height: 1.5vw;
+    background-color: black;
+    color: white;
+    border: 0.01vw solid white;
+    margin: 5px;
+}
+
+.Text {
+    color: white;
+}
