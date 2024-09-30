@@ -11,6 +11,7 @@ function getRandomTriangleColor() {
     return color;
 }
 
+
 class Triangle {
     constructor(ctx, canvas_width, canvas_height) {
         this.ctx = ctx;
@@ -116,7 +117,8 @@ class Triangle {
     }
 }
 
-function main1() {
+
+function main() {
     // Retrieve <canvas> element
     const canvas = document.getElementById('mycanvas');
 
