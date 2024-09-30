@@ -5,6 +5,7 @@ export default defineConfig({
 	// root: "LW2", // Set LW2 as the root directory
 	// root: "LW3", // Set LW3 as the root directory
 	// root: "LW4/LW4.1", // Set LW4/LW4.1 as the root directory
-	root: "LW4/LW4.2", // Set LW4/LW4.2 as the root directory
+	// root: "LW4/LW4.2", // Set LW4/LW4.2 as the root directory
+	root: "LW4/LW4.3", // Set LW4/LW4.2 as the root directory
 	publicDir: "../public", // Adjust the path to the public directory
 });
