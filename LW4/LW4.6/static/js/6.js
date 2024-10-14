@@ -10,10 +10,9 @@ class Timer {
         this.canvas_height = canvas_height;
 
         this.rotationAngle = 0; // Initialize rotation angle
-
         this.initialLaunch = true;
-
-        this.rotationInterval = null; // To store interval ID
+        // this.rotationInterval = null; // To store interval ID
+        this.lastTime = 0;
 
         this.initialCenter = {
             x: canvas_width / 2,
@@ -40,6 +39,8 @@ class Timer {
             x: this.initialCenter.x - this.secondsSize.width / 2,
             y: this.initialCenter.y - this.secondsSize.height * 0.58
         }
+
+        this.secondsIsAnimating = false;
 
         // minutes
         this.minutesImg = new Image();
@@ -71,16 +72,39 @@ class Timer {
     launchTimer() {
         if (this.initialLaunch) {
             this.initialLaunch = false;
+            this.secondsIsAnimating = true;
+
+            requestAnimationFrame((timestamp) => this.animateRotation(timestamp));
         }
 
         // Start rotating the image every second
-        this.rotationInterval = setInterval(() => {
-            this.rotationAngle += 2 * Math.PI / 60; // 10 degrees in radians
-            this.draw(); // Redraw after updating rotation
-        }, 1000); // Every second
+        // this.rotationInterval = setInterval(() => {
+        //     this.rotationAngle += 2 * Math.PI / 60; // 10 degrees in radians
+        //     this.draw(); // Redraw after updating rotation
+        // }, 1000); // Every second
 
         // this.rotationAngle += Math.PI / 12; 
         // this.draw(); 
+    }
+
+    animateRotation(timestamp) {
+        if (!this.secondsIsAnimating) return; // Stop animation if not needed
+
+        // Calculate the time difference (in milliseconds)
+        if (!this.lastTime) this.lastTime = timestamp;
+        const elapsedTime = timestamp - this.lastTime;
+
+        // Rotate every second (1000 milliseconds)
+        if (elapsedTime >= 1000) {
+            this.rotationAngle += 2 * Math.PI / 60; 
+            this.lastTime = timestamp; // Reset last time
+        }
+
+        // Redraw the scene with the updated rotation
+        this.draw();
+
+        // Continue the animation
+        requestAnimationFrame((newTimestamp) => this.animateRotation(newTimestamp));
     }
 
     draw() {
