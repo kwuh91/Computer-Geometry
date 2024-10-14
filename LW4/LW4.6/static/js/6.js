@@ -44,6 +44,8 @@ class Timer {
             y: canvas_height / 2        
         };
         
+        this.isAnimating = false;
+
         // timer
         this.timerImg = new Image();
         this.timerImg.src = '../../images/stopwatch2.png'
@@ -51,6 +53,8 @@ class Timer {
             x: this.initialCenter.x - this.timerImg.naturalWidth  / 2,
             y: this.initialCenter.y - this.timerImg.naturalHeight / 2
         }
+        console.log(`timer natural width:${this.timerImg.naturalWidth}`)   // 612 
+        console.log(`timer natural height:${this.timerImg.naturalHeight}`) // 612
 
         // seconds
         this.secondsImg = new Image();
@@ -64,8 +68,8 @@ class Timer {
             x: this.initialCenter.x - this.secondsSize.width / 2,
             y: this.initialCenter.y - this.secondsSize.height * this.#secondsImageRelativeCenterOffsetCoeffInit
         }
-
-        this.isAnimating = false;
+        console.log(`seconds natural width:${this.secondsImg.naturalWidth}`)   // 500
+        console.log(`seconds natural height:${this.secondsImg.naturalHeight}`) // 500
 
         // minutes
         this.minutesImg = new Image();
@@ -79,6 +83,8 @@ class Timer {
             x: this.initialCenter.x - this.minutesSize.width / 2,
             y: this.initialCenter.y - this.minutesSize.height * this.#minutesImageRelativeCenterOffsetCoeffInit
         }
+        console.log(`minutes natural width:${this.minutesImg.naturalWidth}`)   // 224
+        console.log(`minutes natural height:${this.minutesImg.naturalHeight}`) // 1111
 
         // hours
         this.hoursImg = new Image();
@@ -92,6 +98,8 @@ class Timer {
             x: this.initialCenter.x - this.hoursSize.width / 2,
             y: this.initialCenter.y - this.hoursSize.height * this.#hoursImageRelativeCenterOffsetCoeffInit
         }
+        console.log(`hours natural width:${this.hoursImg.naturalWidth}`)   // 360
+        console.log(`hours natural height:${this.hoursImg.naturalHeight}`) // 621
     }
 
     launchTimer() {
