@@ -49,10 +49,10 @@ class Triangle {
 
         this.ctx.rotate(this.angle);
 
-        this.ctx.translate(this.horizontalOffset, 0); // 4.4
-        // this.ctx.translate(this.horizontalOffset * Math.cos(this.angle), this.horizontalOffset * Math.cos(Math.PI/2 + this.angle)); //4.5
+        // this.ctx.translate(this.horizontalOffset, 0); // 4.4
+        this.ctx.translate(this.horizontalOffset * Math.cos(this.angle), this.horizontalOffset * Math.cos(Math.PI/2 + this.angle)); //4.5
 
-        this.ctx.translate(0, 0); // Move back to original center
+        // this.ctx.translate(0, 0); // Move back to original center
 
         this.ctx.fillStyle = 'white';
         this.ctx.beginPath();

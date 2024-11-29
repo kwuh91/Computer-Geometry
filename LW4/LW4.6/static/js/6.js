@@ -13,15 +13,15 @@ class Timer {
 
     #imageAbsoluteCenterOffsetTranslate = 1.075;
 
-    #secondsImageRelativeCenterOffsetCoeffTranslate = 0.7325;
-    #minutesImageRelativeCenterOffsetCoeffTranslate = 0.9525;
-    #hoursImageRelativeCenterOffsetCoeffTranslate   = 0.86;
+    #secondsImageRelativeCenterOffsetCoeffTranslate = 0.72;
+    #minutesImageRelativeCenterOffsetCoeffTranslate = 0.927;
+    #hoursImageRelativeCenterOffsetCoeffTranslate   = 0.8325;
 
     #one60thOfACircle = 2 * Math.PI / 60;
 
     #oneSecondInMilliseconds = 1000;
-    #oneMinuteInMilliseconds = this.#oneSecondInMilliseconds * 61;
-    #oneHourInMilliseconds   = this.#oneMinuteInMilliseconds * 61;
+    #oneMinuteInMilliseconds = this.#oneSecondInMilliseconds * 60;
+    #oneHourInMilliseconds   = this.#oneMinuteInMilliseconds * 60;
 
     constructor(ctx, canvas_width, canvas_height) {
         this.ctx = ctx;
@@ -50,8 +50,8 @@ class Timer {
         this.timerImg = new Image();
         this.timerImg.src = '../../images/stopwatch2.png'
         this.timerCenter = {
-            x: this.initialCenter.x - this.timerImg.naturalWidth  / 2,
-            y: this.initialCenter.y - this.timerImg.naturalHeight / 2
+            x: this.initialCenter.x - 612  / 2,
+            y: this.initialCenter.y - 612 / 2
         }
         console.log(`timer natural width:${this.timerImg.naturalWidth}`)   // 612 
         console.log(`timer natural height:${this.timerImg.naturalHeight}`) // 612
@@ -61,8 +61,8 @@ class Timer {
         this.secondsImg.src = '../../images/second.png'
         this.secondsScale = this.#secondsImageScaleCoeff;
         this.secondsSize = {
-            width:  this.secondsImg.naturalWidth  * this.secondsScale,
-            height: this.secondsImg.naturalHeight * this.secondsScale,
+            width:  500  * this.secondsScale,
+            height: 500 * this.secondsScale,
         }
         this.secondsCenter = {
             x: this.initialCenter.x - this.secondsSize.width / 2,
@@ -76,8 +76,8 @@ class Timer {
         this.minutesImg.src = '../../images/minute.png'
         this.minutesScale = this.#minutesImageScaleCoeff;
         this.minutesSize = {
-            width:  this.minutesImg.naturalWidth  * this.minutesScale,
-            height: this.minutesImg.naturalHeight * this.minutesScale,
+            width:  224  * this.minutesScale,
+            height: 1111 * this.minutesScale,
         }
         this.minutesCenter = {
             x: this.initialCenter.x - this.minutesSize.width / 2,
@@ -91,8 +91,8 @@ class Timer {
         this.hoursImg.src = '../../images/hour.png'
         this.hoursScale = this.#hoursImageScaleCoeff;
         this.hoursSize = {
-            width:  this.hoursImg.naturalWidth  * this.hoursScale,
-            height: this.hoursImg.naturalHeight * this.hoursScale,
+            width:  360  * this.hoursScale,
+            height: 621 * this.hoursScale,
         }
         this.hoursCenter = {
             x: this.initialCenter.x - this.hoursSize.width / 2,
