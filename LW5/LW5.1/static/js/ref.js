@@ -91,6 +91,7 @@ function main() {
 	const verticesColors = new Float32Array( colors );
 	lineGeometry.setAttribute('color', new THREE.BufferAttribute(verticesColors, 3));
 	
+	
 	const controls = {
 		basicColor: "#ffffff"
 	};
