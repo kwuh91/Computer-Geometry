@@ -4,7 +4,7 @@ import { BASE_LAYER, HAZE_MAX, HAZE_MIN, HAZE_OPACITY } from "../config/renderCo
 import { clamp } from "../utils.js"
 
 const hazeTexture = new THREE.TextureLoader().load('../../../graphics/feathered60.png')
-const hazeSprite = new THREE.SpriteMaterial({map: hazeTexture, color: 0x0082ff, opacity: HAZE_OPACITY, depthTest: false, depthWrite: false })
+const hazeSprite = new THREE.SpriteMaterial({map: hazeTexture, color: 0x0082ff, opacity: HAZE_OPACITY, depthTest: true, depthWrite: true })
 
 export class Haze {
 
@@ -21,7 +21,7 @@ export class Haze {
 
     toThreeObject(scene) {
         let sprite = new THREE.Sprite(hazeSprite)
-        sprite.layers.set(BASE_LAYER)
+        // sprite.layers.set(BASE_LAYER)
         sprite.position.copy(this.position)
 
         // varying size of dust clouds

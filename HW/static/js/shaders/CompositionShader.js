@@ -15,9 +15,12 @@ export class CompositionShader {
         varying vec2 vUv;
 
         void main() {
+            vec4 baseColor    = texture2D(baseTexture, vUv);
+            vec4 bloomColor   = texture2D(bloomTexture, vUv);
+            vec4 overlayColor = texture2D(overlayTexture, vUv);
 
             // Baselayer + bloomlayer + 0.2(overlay)
-            gl_FragColor = ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
+            gl_FragColor = ( baseColor + vec4( 1.0 ) * bloomColor );
 
         }
 `
