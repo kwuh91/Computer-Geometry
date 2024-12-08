@@ -4,6 +4,8 @@ import { BLOOM_LAYER, STAR_MAX, STAR_MIN } from '../config/renderConfig.js'
 import { starTypes } from '../config/starDistributions.js'
 import { clamp } from '../utils.js'
 
+export const GRAPHICS_PATH = '../../graphics/'
+
 const texture = new THREE.TextureLoader().load('../../../graphics/sprite120.png')
 const materials = starTypes.color.map((color) => new THREE.SpriteMaterial({map: texture, color: color}))
 

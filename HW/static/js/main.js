@@ -17,6 +17,10 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { Galaxy } from './objects/galaxy.js';
 import { SolarSystem } from './objects/solarSystem.js';
 
+import { SUN_X, SUN_Y, SUN_Z, SUN_RADIUS, SUN_ROTATION_SPEED } from './config/solarSystemConfig.js'
+
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
 let canvas, renderer, camera, scene, orbit, bloomComposer, overlayComposer, finalComposer
 
 const bloomLayer = new THREE.Layers();
@@ -36,7 +40,8 @@ function initThree() {
 
     // camera
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5000000 );
-    camera.position.set(0, 500, 500);
+    // camera.position.set(0, 500, 500);
+    camera.position.set(0, 10, 10);
     camera.up.set(0, 0, 1);
     camera.lookAt(0, 0, 0);
 
@@ -140,7 +145,10 @@ async function render() {
         galaxy.updateScale(camera)
     } 
 
-    solarSystem.updateScale(camera)
+    solarSystem.updateScale(camera);
+    solarSystem.rotate();
+
+    // console.log(`in render`)
 
     // Run each pass of the render pipeline
     renderPipeline()
@@ -182,14 +190,35 @@ function restoreMaterial( obj ) {
 }
 
 initThree()
-let axes = new THREE.AxesHelper(5.0)
+let axes = new THREE.AxesHelper(50.0)
 scene.add(axes)
 
 // let galaxy = new Galaxy(scene)
 
-
 // 
 
 let solarSystem = new SolarSystem(scene, false);
+
+// // Create a loader
+// const loader = new GLTFLoader();
+// // Load the GLB file
+// loader.load('../../graphics/shark.glb', function(gltf) {
+//     const model = gltf.scene;
+
+//     // Scale the model
+//     model.scale.set(1000, 1000, 1000); // Scale the model to twice its original size
+
+//     // Move the model
+//     model.position.set(0 + SUN_X, 100 + SUN_Y, 0); // Move the model 1 unit along the x-axis
+
+//     model.rotateX(Math.PI/2);
+
+//     model.layers.enable(0);
+
+//     // Add the model to the scene
+//     scene.add(model);
+// }, undefined, function(error) {
+//     console.error(error);
+// });
 
 requestAnimationFrame(render)

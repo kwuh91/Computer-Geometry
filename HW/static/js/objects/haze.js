@@ -14,7 +14,7 @@ export class Haze {
     }
 
     updateScale(camera) {
-        let dist = this.position.distanceTo(camera.position) / 250
+        let dist = this.position.distanceTo(camera.position) / 550
         this.obj.material.opacity = clamp(HAZE_OPACITY * Math.pow(dist / 2.5, 2), 0, HAZE_OPACITY)
         this.obj.material.needsUpdate = true
     }

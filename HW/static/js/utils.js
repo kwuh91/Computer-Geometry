@@ -20,3 +20,7 @@ export function spiral(x, y, z, offset) {
     theta += (r/ARM_X_DIST) * SPIRAL
     return new Vector3(r*Math.cos(theta), r*Math.sin(theta), z)
 }
+
+export function degrees_to_radians(degree) {
+    return degree * Math.PI / 180;
+}
