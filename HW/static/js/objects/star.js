@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { BASE_LAYER, BLOOM_LAYER, STAR_MAX, STAR_MIN } from '../config/renderConfig.js'
+import { BLOOM_LAYER, STAR_MAX, STAR_MIN } from '../config/renderConfig.js'
 import { starTypes } from '../config/starDistributions.js'
 import { clamp } from '../utils.js'
 
@@ -38,8 +38,7 @@ export class Star {
 
     toThreeObject(scene) {
         let sprite = new THREE.Sprite(materials[this.starType])
-        sprite.layers.set(BLOOM_LAYER)
-        // sprite.layers.set(BASE_LAYER)
+        sprite.layers.enable(BLOOM_LAYER)
         
         sprite.scale.multiplyScalar(starTypes.size[this.starType])
         sprite.position.copy(this.position)

@@ -1,27 +1,180 @@
 import * as THREE from 'three'
 
-// Data and visualization
-import { CompositionShader} from './shaders/CompositionShader.js'
-import { BASE_LAYER, BLOOM_LAYER, BLOOM_PARAMS, OVERLAY_LAYER } from "./config/renderConfig.js";
-
-// Rendering
-// import { MapControls } from 'three/addons/controls/MapControls.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { Galaxy } from './objects/galaxy.js';
-import { Star } from './objects/star.js';
-// import { triplanarTexture } from 'three/webgpu';
 
-// import { BloomEffect, EffectComposer, RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+let canvas, renderer, camera, scene, orbit, finalComposer, bloomComposer
 
-let canvas, renderer, camera, scene, orbit, baseComposer, finalComposer, bloomComposer, overlayComposer
+// // // // // // // T E S T I N G // // // // // // //
 
-// const BASE_LAYER = 0;
+const BLOOM_SCENE = 1;
+
+const bloomLayer = new THREE.Layers();
+bloomLayer.set( BLOOM_SCENE );
+
+const darkMaterial = new THREE.MeshBasicMaterial( { color: 'black' } );
+const materials = {};
+
+function initThree() {
+
+    // grab canvas
+    canvas = document.querySelector('#canvas');
+
+    // scene
+    scene = new THREE.Scene();
+
+    // camera
+    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5000000 );
+    camera.position.set(30, 30, 30);
+
+    // orbit
+    orbit = new OrbitControls(camera, canvas)
+
+    initRenderPipeline()
+}
+
+function initRenderPipeline() {
+
+    // Assign Renderer
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        canvas,
+    })
+    renderer.setPixelRatio( window.devicePixelRatio )
+    renderer.setSize( window.innerWidth, window.innerHeight )
+
+    // Set up post-processing
+    const renderScene = new RenderPass(scene, camera);
+
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0;
+    bloomPass.strength = 0.5;
+    bloomPass.radius = 0;
+
+    bloomComposer = new EffectComposer(renderer);
+    bloomComposer.renderToScreen = false;
+    bloomComposer.addPass(renderScene);
+    bloomComposer.addPass(bloomPass);
+
+    const mixPass = new ShaderPass(
+        new THREE.ShaderMaterial({
+            uniforms: {
+                baseTexture: { value: null },
+                bloomTexture: { value: bloomComposer.renderTarget2.texture }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D baseTexture;
+                uniform sampler2D bloomTexture;
+                varying vec2 vUv;
+                void main() {
+                    gl_FragColor = (texture2D(baseTexture, vUv) + vec4(1.0) * texture2D(bloomTexture, vUv));
+                }
+            `,
+            defines: {}
+        }), "baseTexture"
+    );
+
+    const outputPass = new OutputPass();
+
+    finalComposer = new EffectComposer( renderer );
+    finalComposer.addPass( renderScene );
+    finalComposer.addPass( mixPass );
+    finalComposer.addPass( outputPass );
+}
+
+function render() {
+
+    orbit.update()
+
+    // fix aspect ratio
+    const canvas = renderer.domElement;
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+
+    // Run each pass of the render pipeline
+    renderPipeline()
+
+    requestAnimationFrame(render)
+
+}
+
+// function disposeMaterial( obj ) {
+
+//     if ( obj.material ) {
+
+//         obj.material.dispose();
+
+//     }
+
+// }
+
+function renderPipeline() {
+
+    scene.traverse( darkenNonBloomed );
+    bloomComposer.render();
+    scene.traverse( restoreMaterial );
+
+    // render the entire scene, then render bloom scene on top
+    finalComposer.render();
+
+}
+
+function darkenNonBloomed( obj ) {
+
+    if ( bloomLayer.test( obj.layers ) === false ) {
+
+        materials[ obj.uuid ] = obj.material;
+        obj.material = darkMaterial;
+
+    }
+
+}
+
+function restoreMaterial( obj ) {
+
+    if ( materials[ obj.uuid ] ) {
+
+        obj.material = materials[ obj.uuid ];
+        delete materials[ obj.uuid ];
+
+    }
+
+}
+
+initThree()
+
+// scene.traverse( disposeMaterial );
+
+// Create a sprite
+const spriteMaterial = new THREE.SpriteMaterial({ color: 0xffffff });
+const sprite = new THREE.Sprite(spriteMaterial);
+sprite.scale.set(10, 10, 1);
+// sprite.layers.enable(BLOOM_SCENE)
+scene.add(sprite);
+
+// Create a mesh
+const geometry = new THREE.BoxGeometry(10, 10, 10);
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const mesh = new THREE.Mesh(geometry, material);
+mesh.position.set(20, 0, 0);
+mesh.layers.enable(BLOOM_SCENE)
+scene.add(mesh);
+
+requestAnimationFrame(render)
 
 // // // // // // // T E S T I N G // // // // // // //
 
@@ -240,137 +393,207 @@ let canvas, renderer, camera, scene, orbit, baseComposer, finalComposer, bloomCo
 
 // //
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ARCHIVE
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// import * as THREE from 'three'
+
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+
+// import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+// import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+// import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+// import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+// import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+// let canvas, renderer, camera, scene, orbit, finalComposer, bloomComposer
+
 // // // // // // // T E S T I N G // // // // // // //
 
-function initThree() {
+// const BASE_SCENE = 0;
+// const BLOOM_SCENE = 1;
 
-    // grab canvas
-    canvas = document.querySelector('#canvas');
+// const bloomLayer = new THREE.Layers();
+// bloomLayer.set( BLOOM_SCENE );
 
-    // scene
-    scene = new THREE.Scene();
+// const darkMaterial = new THREE.MeshBasicMaterial( { color: 'black' } );
+// const materials = {};
 
-    // camera
-    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5000000 );
-    camera.position.set(10, 10, 10);
-    // camera.up.set(0, 0, 1);
-    camera.lookAt(0, 0, 0);
+// function initThree() {
 
-    // map orbit
-    // orbit = new MapControls(camera, canvas)
-    orbit = new OrbitControls(camera, canvas)
-    orbit.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-    orbit.dampingFactor = 0.05;
-    orbit.screenSpacePanning = false;
-    orbit.minDistance = 1;
-    orbit.maxDistance = 16384;
-    // orbit.maxPolarAngle = (Math.PI / 2) - (2 * Math.PI / 360)
+//     // grab canvas
+//     canvas = document.querySelector('#canvas');
 
-    initRenderPipeline()
+//     // scene
+//     scene = new THREE.Scene();
 
-}
+//     // camera
+//     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5000000 );
+//     camera.position.set(10, 10, 10);
+//     // camera.up.set(0, 0, 1);
+//     camera.lookAt(0, 0, 0);
 
-function initRenderPipeline() {
+//     // map orbit
+//     // orbit = new MapControls(camera, canvas)
+//     orbit = new OrbitControls(camera, canvas)
+//     orbit.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+//     orbit.dampingFactor = 0.05;
+//     orbit.screenSpacePanning = false;
+//     orbit.minDistance = 1;
+//     orbit.maxDistance = 16384;
+//     // orbit.maxPolarAngle = (Math.PI / 2) - (2 * Math.PI / 360)
 
-    // Assign Renderer
-    renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        canvas,
-        logarithmicDepthBuffer: true,
-    })
-    renderer.setPixelRatio( window.devicePixelRatio )
-    renderer.setSize( window.innerWidth, window.innerHeight )
-    renderer.outputEncoding = THREE.sRGBEncoding
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 0.5
+//     initRenderPipeline()
 
-    // Set up post-processing
-    const composer = new EffectComposer(renderer);
-    const renderScene = new RenderPass(scene, camera);
-    composer.addPass(renderScene);
+// }
 
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-    bloomPass.threshold = 0;
-    bloomPass.strength = 0.5;
-    bloomPass.radius = 0;
+// function initRenderPipeline() {
 
-    bloomComposer = new EffectComposer(renderer);
-    bloomComposer.renderToScreen = false;
-    bloomComposer.addPass(renderScene);
-    bloomComposer.addPass(bloomPass);
+//     // Assign Renderer
+//     renderer = new THREE.WebGLRenderer({
+//         antialias: true,
+//         canvas,
+//         logarithmicDepthBuffer: true,
+//     })
+//     renderer.setPixelRatio( window.devicePixelRatio )
+//     renderer.setSize( window.innerWidth, window.innerHeight )
+//     // renderer.outputEncoding = THREE.sRGBEncoding
+//     // renderer.toneMapping = THREE.ACESFilmicToneMapping
+//     // renderer.toneMappingExposure = 0.5
 
-    const finalPass = new ShaderPass(
-        new THREE.ShaderMaterial({
-            uniforms: {
-                baseTexture: { value: null },
-                bloomTexture: { value: bloomComposer.renderTarget2.texture }
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform sampler2D baseTexture;
-                uniform sampler2D bloomTexture;
-                varying vec2 vUv;
-                void main() {
-                    gl_FragColor = (texture2D(baseTexture, vUv) + vec4(1.0) * texture2D(bloomTexture, vUv));
-                }
-            `,
-            defines: {}
-        }), "baseTexture"
-    );
-    finalPass.needsSwap = true;
+//     // Set up post-processing
+//     // const composer = new EffectComposer(renderer);
+//     const renderScene = new RenderPass(scene, camera);
+//     // composer.addPass(renderScene);
 
-    finalComposer = new EffectComposer(renderer);
-    finalComposer.addPass(renderScene);
-    finalComposer.addPass(finalPass);
-}
+//     const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+//     bloomPass.threshold = 0;
+//     bloomPass.strength = 0.5;
+//     bloomPass.radius = 0;
 
+//     bloomComposer = new EffectComposer(renderer);
+//     bloomComposer.renderToScreen = false;
+//     bloomComposer.addPass(renderScene);
+//     bloomComposer.addPass(bloomPass);
 
-async function render() {
+//     const mixPass = new ShaderPass(
+//         new THREE.ShaderMaterial({
+//             uniforms: {
+//                 baseTexture: { value: null },
+//                 bloomTexture: { value: bloomComposer.renderTarget2.texture }
+//             },
+//             vertexShader: `
+//                 varying vec2 vUv;
+//                 void main() {
+//                     vUv = uv;
+//                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+//                 }
+//             `,
+//             fragmentShader: `
+//                 uniform sampler2D baseTexture;
+//                 uniform sampler2D bloomTexture;
+//                 varying vec2 vUv;
+//                 void main() {
+//                     gl_FragColor = (texture2D(baseTexture, vUv) + vec4(1.0) * texture2D(bloomTexture, vUv));
+//                 }
+//             `,
+//             defines: {}
+//         }), "baseTexture"
+//     );
+//     mixPass.needsSwap = true;
 
-    orbit.update()
+//     const outputPass = new OutputPass();
 
-    // fix aspect ratio
-    const canvas = renderer.domElement;
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-    camera.updateProjectionMatrix();
+//     finalComposer = new EffectComposer( renderer );
+//     finalComposer.addPass( renderScene );
+//     finalComposer.addPass( mixPass );
+//     finalComposer.addPass( outputPass );
 
-    // Run each pass of the render pipeline
-    renderPipeline()
+//     // const raycaster = new THREE.Raycaster();
 
-    requestAnimationFrame(render)
+//     // finalComposer = new EffectComposer(renderer);
+//     // finalComposer.addPass(renderScene);
+//     // finalComposer.addPass(finalPass);
+// }
 
-}
+// function render() {
 
-function renderPipeline() {
+//     orbit.update()
 
-    bloomComposer.render();
-    finalComposer.render();
+//     // fix aspect ratio
+//     const canvas = renderer.domElement;
+//     camera.aspect = canvas.clientWidth / canvas.clientHeight;
+//     camera.updateProjectionMatrix();
 
-}
+//     // Run each pass of the render pipeline
+//     renderPipeline()
 
-initThree()
-let axes = new THREE.AxesHelper(5.0)
-scene.add(axes)
+//     requestAnimationFrame(render)
 
+// }
 
-// Create a sprite
-const spriteMaterial = new THREE.SpriteMaterial({ color: 0xffffff });
-const sprite = new THREE.Sprite(spriteMaterial);
-sprite.scale.set(10, 10, 1);
-scene.add(sprite);
+// // function disposeMaterial( obj ) {
 
-// Create a mesh
-const geometry = new THREE.BoxGeometry(10, 10, 10);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const mesh = new THREE.Mesh(geometry, material);
-mesh.position.set(20, 0, 0);
-scene.add(mesh);
+// //     if ( obj.material ) {
 
+// //         obj.material.dispose();
 
-requestAnimationFrame(render)
+// //     }
+
+// // }
+
+// function renderPipeline() {
+
+//     scene.traverse( darkenNonBloomed );
+//     bloomComposer.render();
+//     scene.traverse( restoreMaterial );
+
+//     // render the entire scene, then render bloom scene on top
+//     finalComposer.render();
+
+// }
+
+// function darkenNonBloomed( obj ) {
+
+//     if ( bloomLayer.test( obj.layers ) === false ) {
+
+//         materials[ obj.uuid ] = obj.material;
+//         obj.material = darkMaterial;
+
+//     }
+
+// }
+
+// function restoreMaterial( obj ) {
+
+//     if ( materials[ obj.uuid ] ) {
+
+//         obj.material = materials[ obj.uuid ];
+//         delete materials[ obj.uuid ];
+
+//     }
+
+// }
+
+// initThree()
+
+// // scene.traverse( disposeMaterial );
+
+// // Create a sprite
+// const spriteMaterial = new THREE.SpriteMaterial({ color: 0xffffff });
+// const sprite = new THREE.Sprite(spriteMaterial);
+// sprite.scale.set(10, 10, 1);
+// // sprite.layers.enable(BLOOM_SCENE)
+// scene.add(sprite);
+
+// // Create a mesh
+// const geometry = new THREE.BoxGeometry(10, 10, 10);
+// const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+// const mesh = new THREE.Mesh(geometry, material);
+// mesh.position.set(20, 0, 0);
+// mesh.layers.enable(BLOOM_SCENE)
+// scene.add(mesh);
+
+// requestAnimationFrame(render)

@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { BASE_LAYER, HAZE_MAX, HAZE_MIN, HAZE_OPACITY } from "../config/renderConfig.js"
+import { BLOOM_LAYER, HAZE_MAX, HAZE_MIN, HAZE_OPACITY } from "../config/renderConfig.js"
 import { clamp } from "../utils.js"
 
 const hazeTexture = new THREE.TextureLoader().load('../../../graphics/feathered60.png')
@@ -21,7 +21,7 @@ export class Haze {
 
     toThreeObject(scene) {
         let sprite = new THREE.Sprite(hazeSprite)
-        // sprite.layers.set(BASE_LAYER)
+        sprite.layers.enable(BLOOM_LAYER)
         sprite.position.copy(this.position)
 
         // varying size of dust clouds
