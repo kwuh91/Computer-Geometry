@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as  dat from 'dat.gui';
 
 // Data and visualization
 import { CompositionShader} from './shaders/CompositionShader.js'
@@ -17,7 +18,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { Galaxy } from './objects/galaxy.js';
 import { SolarSystem } from './objects/solarSystem.js';
 
-import { SUN_X, SUN_Y, SUN_Z, SUN_RADIUS, SUN_ROTATION_SPEED } from './config/solarSystemConfig.js'
+import { GALAXY_SCALE_FACTOR } from './config/solarSystemConfig.js'
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -29,6 +30,12 @@ bloomLayer.set( BLOOM_LAYER );
 const darkMaterial = new THREE.MeshBasicMaterial( { color: 'black' } );
 const materials = {};
 
+let isFreeCam = true;
+let isTransitioning = false;
+let transitionCurve = null;
+let transitionTime = 0;
+const transitionDuration = 5; // Duration of the transition in seconds
+
 function initThree() {
 
     // grab canvas
@@ -39,9 +46,9 @@ function initThree() {
     scene.fog = new THREE.FogExp2(0xEBE2DB, 0.00003);
 
     // camera
-    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5000000 );
+    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, GALAXY_SCALE_FACTOR*2 );
     // camera.position.set(0, 500, 500);
-    camera.position.set(0, 10, 10);
+    camera.position.set(0, 150, 150);
     camera.up.set(0, 0, 1);
     camera.lookAt(0, 0, 0);
 
@@ -51,7 +58,7 @@ function initThree() {
     orbit.dampingFactor = 0.05;
     orbit.screenSpacePanning = false;
     orbit.minDistance = 1;
-    orbit.maxDistance = 16384;
+    orbit.maxDistance = GALAXY_SCALE_FACTOR*2;
     orbit.maxPolarAngle = (Math.PI / 2) - (Math.PI / 360)
 
     initRenderPipeline()
@@ -125,9 +132,35 @@ function resizeRendererToDisplaySize(renderer) {
     return needResize;
 }
 
+function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
 async function render() {
 
-    orbit.update()
+    if (isTransitioning) {
+        transitionTime += 0.016; // Assuming 60 FPS
+        if (transitionTime >= transitionDuration) {
+            transitionTime = transitionDuration;
+            isTransitioning = false;
+        }
+        const t = easeInOut(transitionTime / transitionDuration);
+        const point = transitionCurve.getPoint(t);
+        camera.position.copy(point);
+        camera.lookAt(solarSystem.earth.obj.position);
+        orbit.target.copy(solarSystem.earth.obj.position);
+        orbit.update();
+    } else if (isFreeCam) {
+        orbit.update();
+    } else {
+        // Lock camera to follow solarSystem.earth.position
+        const earthPosition = solarSystem.earth.obj.position.clone();
+        const offset = new THREE.Vector3().subVectors(camera.position, orbit.target);
+        camera.position.copy(earthPosition).add(offset);
+        camera.lookAt(earthPosition);
+        orbit.target.copy(earthPosition);
+        orbit.update();
+    }
 
     // fix buffer size
     if (resizeRendererToDisplaySize(renderer)) {
@@ -195,9 +228,42 @@ scene.add(axes)
 
 // let galaxy = new Galaxy(scene)
 
-// 
-
 let solarSystem = new SolarSystem(scene, false);
+
+// Initialize dat.gui
+const gui = new dat.GUI();
+const controls = {
+    freecam: function() {
+        isFreeCam = true;
+    },
+    earth: function() {
+        isFreeCam = false;
+        const earthPosition = solarSystem.earth.obj.position.clone();
+        const offset = new THREE.Vector3(0, 1, 1); // Adjust the offset as needed
+        const targetPosition = earthPosition.clone().add(offset);
+
+        // Define a Bezier curve
+        const startPoint = camera.position.clone();
+        const controlPoint1 = startPoint.clone().lerp(targetPosition, 0.33);
+        controlPoint1.y += 5; // Adjust the control point for a smoother curve
+        const controlPoint2 = startPoint.clone().lerp(targetPosition, 0.66);
+        controlPoint2.y += 5; // Adjust the control point for a smoother curve
+
+        transitionCurve = new THREE.CubicBezierCurve3(
+            startPoint,
+            controlPoint1,
+            controlPoint2,
+            targetPosition
+        );
+
+        isTransitioning = true;
+        transitionTime = 0;
+    }
+};
+gui.add(controls, 'freecam').name('Free Camera');
+gui.add(controls, 'earth').name('Follow Earth');
+
+requestAnimationFrame(render)
 
 // // Create a loader
 // const loader = new GLTFLoader();
@@ -220,5 +286,3 @@ let solarSystem = new SolarSystem(scene, false);
 // }, undefined, function(error) {
 //     console.error(error);
 // });
-
-requestAnimationFrame(render)

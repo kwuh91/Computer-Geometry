@@ -8,6 +8,8 @@ export const SPHERE_HEIGHT_SEGMENTS = 32;
 export const SUN_MIN = 0.5
 export const SUN_MAX = 1.0
 
+export const DELTA_T = 1/60
+
 export const HAZE_MAX = 50.0
 export const HAZE_MIN = 20.0
 export const HAZE_OPACITY = 0.2

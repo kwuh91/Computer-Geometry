@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 
-import { SUN_X, SUN_Y, SUN_Z, EARTH_RADIUS, EARTH_TO_SUN_DIST, EARTH_ROTATION_SPEED } from '../config/solarSystemConfig.js'
-import { BLOOM_LAYER, SUN_MAX, SUN_MIN, SPHERE_WIDTH_SEGMENTS, SPHERE_HEIGHT_SEGMENTS } from '../config/renderConfig.js'
-import { clamp, degrees_to_radians } from '../utils.js'
+import { SUN_X, SUN_Y, SUN_Z, REAL_EARTH_TO_SUN_DISTANCE, REAL_EARTH_DIAMETER, REAL_EARTH_ORBITAL_SPEED, REAL_EARTH_ROTATIONAL_SPEED } from '../config/solarSystemConfig.js'
+import { BLOOM_LAYER, SUN_MAX, SUN_MIN, SPHERE_WIDTH_SEGMENTS, SPHERE_HEIGHT_SEGMENTS, DELTA_T } from '../config/renderConfig.js'
+import { clamp, degrees_to_radians, get_scaled_planet_size, get_scaled_planet_to_sun_dist, get_scaled_planet_orbital_speed, get_scaled_planet_rotational_speed } from '../utils.js'
 
 const GRAPHICS_PATH = '../../graphics/earth'
 
@@ -11,15 +11,20 @@ export class Earth {
     constructor(scene) {
         this.phi = 0
         
-        let x = EARTH_TO_SUN_DIST * Math.cos(this.phi)
-        let y = EARTH_TO_SUN_DIST * Math.sin(this.phi)
-        let z = SUN_Z
+        this.planetToSunDistance = get_scaled_planet_to_sun_dist(REAL_EARTH_TO_SUN_DISTANCE)
+        this.radius = get_scaled_planet_size(REAL_EARTH_DIAMETER)
+        this.orbitalSpeed = get_scaled_planet_orbital_speed(REAL_EARTH_ORBITAL_SPEED)
+        this.rotationalSpeed = get_scaled_planet_rotational_speed(REAL_EARTH_ROTATIONAL_SPEED)
+
+        let x = SUN_X + this.planetToSunDistance * Math.cos(this.phi)
+        let y = SUN_Y + this.planetToSunDistance * Math.sin(this.phi)
+        let z = SUN_Z 
 
         this.textureLoader = new THREE.TextureLoader();
 
-        this.position = new THREE.Vector3(x, y, z)
+        let initialPosition = new THREE.Vector3(x, y, z)
 
-        let geometry = new THREE.SphereGeometry(EARTH_RADIUS, SPHERE_WIDTH_SEGMENTS, SPHERE_HEIGHT_SEGMENTS);
+        let geometry = new THREE.SphereGeometry(this.radius, SPHERE_WIDTH_SEGMENTS, SPHERE_HEIGHT_SEGMENTS);
         let material = this.createMaterial();
 
         let cloudMesh = this.createClouds();
@@ -27,7 +32,7 @@ export class Earth {
 
         let mesh = new THREE.Mesh(geometry, material);
         mesh.add(cloudMesh);
-        mesh.position.copy(this.position)
+        mesh.position.copy(initialPosition)
         mesh.rotation.x = Math.PI/2
 
         this.obj = mesh
@@ -40,7 +45,7 @@ export class Earth {
           `${GRAPHICS_PATH}/earth_clouds.png`
         );
       
-        const geometry = new THREE.SphereGeometry(EARTH_RADIUS + 0.005, SPHERE_WIDTH_SEGMENTS, SPHERE_HEIGHT_SEGMENTS);
+        const geometry = new THREE.SphereGeometry(this.radius + 0.005, SPHERE_WIDTH_SEGMENTS, SPHERE_HEIGHT_SEGMENTS);
         const material = new THREE.MeshPhongMaterial({
           map: canvasCloud,
           transparent: true,
@@ -78,32 +83,41 @@ export class Earth {
         return material;
     }
 
-    updateScale(camera) {
-        let dist = this.position.distanceTo(camera.position) / 250
+    // updateScale(camera) {
+    //     let dist = this.obj.position.distanceTo(camera.position) / 250
 
-        // update earth size
-        let earthSize = dist * EARTH_RADIUS
-        earthSize = clamp(earthSize, SUN_MIN, SUN_MAX)
-        this.obj?.scale.copy(new THREE.Vector3(earthSize, earthSize, earthSize))
-    }
+    //     // update size
+    //     let size = dist * this.radius
+    //     size = clamp(size, SUN_MIN, SUN_MAX)
+    //     this.obj?.scale.copy(new THREE.Vector3(size, size, size))
+    // }
 
     rotate() { 
         // rotating around the sun
-        this.phi = this.phi + degrees_to_radians(EARTH_ROTATION_SPEED);
+        let omega = this.orbitalSpeed / this.planetToSunDistance
+        let deltaPhi = omega * DELTA_T
+        this.phi = this.phi + deltaPhi;
 
-        let x = EARTH_TO_SUN_DIST * Math.cos(this.phi) + SUN_X
-        let y = EARTH_TO_SUN_DIST * Math.sin(this.phi) + SUN_Y
-        let z = 0 + SUN_Z
+        let x = SUN_X + this.planetToSunDistance * Math.cos(this.phi)
+        let y = SUN_Y + this.planetToSunDistance * Math.sin(this.phi)
+        let z = SUN_Z
 
         let newPosition = new THREE.Vector3(x, y, z)
 
+        // console.log(`new earth position: x: ${newPosition.x}; y: ${newPosition.y}; z: ${newPosition.z}`)
+
         this.obj?.position.copy(newPosition);
+
+        // console.log(`new earth position: x: ${this.obj?.position.x}; y: ${this.obj?.position.y}; z: ${this.obj?.position.z}`)
 
         // rotating around itself
         // this.obj.children[0].rotation.y += (1/16) * EARTH_ROTATION_SPEED;
         // this.obj.rotation.y += (1/20) * EARTH_ROTATION_SPEED;
 
-        this.obj.children[0].rotation.z += (1/16) * EARTH_ROTATION_SPEED;
-        this.obj.rotation.z += (1/20) * EARTH_ROTATION_SPEED;
+        omega = this.rotationalSpeed / this.radius
+        deltaPhi = omega * DELTA_T
+
+        this.obj.children[0].rotation.y += (1/4) * deltaPhi; // clouds
+        this.obj.rotation.y += deltaPhi; // main body
     }
 }
