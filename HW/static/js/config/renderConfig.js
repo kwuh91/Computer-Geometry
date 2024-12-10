@@ -2,8 +2,9 @@
 export const STAR_MIN = 0.25
 export const STAR_MAX = 5.0
 
-export const SPHERE_WIDTH_SEGMENTS = 32;
-export const SPHERE_HEIGHT_SEGMENTS = 32;
+export const SPHERE_WIDTH_SEGMENTS  = 32 * 2;
+export const SPHERE_HEIGHT_SEGMENTS = 32 * 2;
+export const THETA_SEGMENTS         = 32 * 2;
 
 export const SUN_MIN = 0.5
 export const SUN_MAX = 1.0

@@ -41,6 +41,10 @@ export function get_scaled_planet_to_sun_dist(realDist) {
     return (SCALED_MERCURY_TO_SUN_DISTANCE * realDist)/REAL_MERCURY_TO_SUN_DISTANCE
 }
 
+// export function get_scaled_satellite_to_parent_dist(realDist) {
+//     return (SCALED_MERCURY_TO_SUN_DISTANCE * realDist)/REAL_MERCURY_TO_SUN_DISTANCE * 2
+// }
+
 export function get_scaled_planet_orbital_speed(realOrbitalSpeed) {
     return (SCALED_MERCURY_ORBITAL_SPEED * realOrbitalSpeed)/REAL_MERCURY_ORBITAL_SPEED
 }

@@ -17,12 +17,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { Galaxy } from './objects/galaxy.js';
 import { SolarSystem } from './objects/solarSystem.js';
+import { BlackHole } from './objects/blackHole.js';
 
 import { GALAXY_SCALE_FACTOR } from './config/solarSystemConfig.js'
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-let canvas, renderer, camera, scene, orbit, bloomComposer, overlayComposer, finalComposer
+let canvas, renderer, camera, scene, orbit, bloomComposer, overlayComposer, finalComposer, currentPlanet
 
 const bloomLayer = new THREE.Layers();
 bloomLayer.set( BLOOM_LAYER );
@@ -52,6 +53,8 @@ function initThree() {
     camera.up.set(0, 0, 1);
     camera.lookAt(0, 0, 0);
 
+    camera.far = 1e7;
+
     // map orbit
     orbit = new OrbitControls(camera, canvas)
     orbit.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -78,6 +81,9 @@ function initRenderPipeline() {
     renderer.outputEncoding = THREE.sRGBEncoding
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 0.5
+
+    // renderer.shadowMap.enabled = true;
+    // renderer.shadowMap.type = THREE.PCFSoftShadowMap;    
 
     // General-use rendering pass for chaining
     const renderScene = new RenderPass( scene, camera )
@@ -147,18 +153,18 @@ async function render() {
         const t = easeInOut(transitionTime / transitionDuration);
         const point = transitionCurve.getPoint(t);
         camera.position.copy(point);
-        camera.lookAt(solarSystem.earth.obj.position);
-        orbit.target.copy(solarSystem.earth.obj.position);
+        camera.lookAt(solarSystem.celestialBodies[currentPlanet].obj.position);
+        orbit.target.copy(solarSystem.celestialBodies[currentPlanet].obj.position);
         orbit.update();
     } else if (isFreeCam) {
         orbit.update();
     } else {
         // Lock camera to follow solarSystem.earth.position
-        const earthPosition = solarSystem.earth.obj.position.clone();
+        const planetPosition = solarSystem.celestialBodies[currentPlanet].obj.position.clone();
         const offset = new THREE.Vector3().subVectors(camera.position, orbit.target);
-        camera.position.copy(earthPosition).add(offset);
-        camera.lookAt(earthPosition);
-        orbit.target.copy(earthPosition);
+        camera.position.copy(planetPosition).add(offset);
+        camera.lookAt(planetPosition);
+        orbit.target.copy(planetPosition);
         orbit.update();
     }
 
@@ -180,6 +186,12 @@ async function render() {
 
     solarSystem.updateScale(camera);
     solarSystem.rotate();
+
+    // blackHole.modelLoaded.then(() => {
+    //     blackHole.rotate();
+    // }).catch((error) => {
+    //     console.error('Failed to load model:', error);
+    // });
 
     // console.log(`in render`)
 
@@ -230,38 +242,105 @@ scene.add(axes)
 
 let solarSystem = new SolarSystem(scene, false);
 
+// let blackHole = new BlackHole(scene);
+
 // Initialize dat.gui
 const gui = new dat.GUI();
 const controls = {
     freecam: function() {
         isFreeCam = true;
     },
-    earth: function() {
-        isFreeCam = false;
-        const earthPosition = solarSystem.earth.obj.position.clone();
-        const offset = new THREE.Vector3(0, 1, 1); // Adjust the offset as needed
-        const targetPosition = earthPosition.clone().add(offset);
-
-        // Define a Bezier curve
-        const startPoint = camera.position.clone();
-        const controlPoint1 = startPoint.clone().lerp(targetPosition, 0.33);
-        controlPoint1.y += 5; // Adjust the control point for a smoother curve
-        const controlPoint2 = startPoint.clone().lerp(targetPosition, 0.66);
-        controlPoint2.y += 5; // Adjust the control point for a smoother curve
-
-        transitionCurve = new THREE.CubicBezierCurve3(
-            startPoint,
-            controlPoint1,
-            controlPoint2,
-            targetPosition
-        );
-
-        isTransitioning = true;
-        transitionTime = 0;
+    followSun: function() {
+        followPlanet('sun');
+    },
+    followMercury: function() {
+        followPlanet('mercury');
+    },
+    followVenus: function() {
+        followPlanet('venus');
+    },
+    followEarth: function() {
+        followPlanet('earth');
+    },
+    followMoon: function() {
+        followPlanet('moon');
+    },
+    followMars: function() {
+        followPlanet('mars');
+    },
+    followJupiter: function() {
+        followPlanet('jupiter');
+    },
+    followSaturn: function() {
+        followPlanet('saturn');
+    },
+    followUranus: function() {
+        followPlanet('uranus');
+    },
+    followNeptune: function() {
+        followPlanet('neptune');
+    },
+    followPluto: function() {
+        followPlanet('pluto');
+    },
+    followPlanetNine: function() {
+        followPlanet('planetNine');
     }
 };
+
+function followPlanet(planetName) {
+    isFreeCam = false;
+    currentPlanet = planetName;
+    let bodyInstance = solarSystem.celestialBodies[planetName]
+    const planetPosition = bodyInstance.obj.position.clone();
+    const offset = new THREE.Vector3(
+        0,
+        bodyInstance.radius, 
+        bodyInstance.radius,
+    ); 
+    // const offset = new THREE.Vector3(0, 0, 0); 
+    const targetPosition = planetPosition.clone().add(offset);
+
+    // console.log(`planet position: ${planetPosition.x, planetPosition.y}`)
+    // console.log(`offset: ${offset.x, offset.y}`)
+    // console.log(`target position: ${targetPosition.x, targetPosition.y}`)
+
+    // Define a Bezier curve
+    const startPoint = camera.position.clone();
+    const controlPoint1 = startPoint.clone().lerp(targetPosition, 0.33);
+    controlPoint1.y += 5; // Adjust the control point for a smoother curve
+    const controlPoint2 = startPoint.clone().lerp(targetPosition, 0.66);
+    controlPoint2.y += 5; // Adjust the control point for a smoother curve
+
+    transitionCurve = new THREE.CubicBezierCurve3(
+        startPoint,
+        controlPoint1,
+        controlPoint2,
+        targetPosition
+    );
+
+    isTransitioning = true;
+    transitionTime = 0;
+}
+
+// let currentPlanet = 'earth';
+
 gui.add(controls, 'freecam').name('Free Camera');
-gui.add(controls, 'earth').name('Follow Earth');
+
+// Create a folder for following planets
+const followPlanetFolder = gui.addFolder('Follow Planet');
+followPlanetFolder.add(controls, 'followSun').name('Sun');
+followPlanetFolder.add(controls, 'followMercury').name('Mercury');
+followPlanetFolder.add(controls, 'followVenus').name('Venus');
+followPlanetFolder.add(controls, 'followEarth').name('Earth');
+followPlanetFolder.add(controls, 'followMoon').name('Moon');
+followPlanetFolder.add(controls, 'followMars').name('Mars');
+followPlanetFolder.add(controls, 'followJupiter').name('Jupiter');
+followPlanetFolder.add(controls, 'followSaturn').name('Saturn');
+followPlanetFolder.add(controls, 'followUranus').name('Uranus');
+followPlanetFolder.add(controls, 'followNeptune').name('Neptune');
+followPlanetFolder.add(controls, 'followPluto').name('Pluto');
+followPlanetFolder.add(controls, 'followPlanetNine').name('Planet Nine');
 
 requestAnimationFrame(render)
 

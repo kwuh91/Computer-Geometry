@@ -11,13 +11,13 @@ export class Earth {
     constructor(scene) {
         this.phi = 0
         
-        this.planetToSunDistance = get_scaled_planet_to_sun_dist(REAL_EARTH_TO_SUN_DISTANCE)
+        this.toParentDistance = get_scaled_planet_to_sun_dist(REAL_EARTH_TO_SUN_DISTANCE)
         this.radius = get_scaled_planet_size(REAL_EARTH_DIAMETER)
         this.orbitalSpeed = get_scaled_planet_orbital_speed(REAL_EARTH_ORBITAL_SPEED)
         this.rotationalSpeed = get_scaled_planet_rotational_speed(REAL_EARTH_ROTATIONAL_SPEED)
 
-        let x = SUN_X + this.planetToSunDistance * Math.cos(this.phi)
-        let y = SUN_Y + this.planetToSunDistance * Math.sin(this.phi)
+        let x = SUN_X + this.toParentDistance * Math.cos(this.phi)
+        let y = SUN_Y + this.toParentDistance * Math.sin(this.phi)
         let z = SUN_Z 
 
         this.textureLoader = new THREE.TextureLoader();
@@ -49,7 +49,7 @@ export class Earth {
         const material = new THREE.MeshPhongMaterial({
           map: canvasCloud,
           transparent: true,
-          depthTest: false,
+          depthTest: true
         });
       
         const cloudMesh = new THREE.Mesh(geometry, material);
@@ -94,12 +94,12 @@ export class Earth {
 
     rotate() { 
         // rotating around the sun
-        let omega = this.orbitalSpeed / this.planetToSunDistance
+        let omega = this.orbitalSpeed / this.toParentDistance
         let deltaPhi = omega * DELTA_T
         this.phi = this.phi + deltaPhi;
 
-        let x = SUN_X + this.planetToSunDistance * Math.cos(this.phi)
-        let y = SUN_Y + this.planetToSunDistance * Math.sin(this.phi)
+        let x = SUN_X + this.toParentDistance * Math.cos(this.phi)
+        let y = SUN_Y + this.toParentDistance * Math.sin(this.phi)
         let z = SUN_Z
 
         let newPosition = new THREE.Vector3(x, y, z)
