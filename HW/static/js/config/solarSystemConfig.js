@@ -1,6 +1,6 @@
 export const GALAXY_SCALE_FACTOR = 1e5
 export const BLACK_HOLE_SCALE_FACTOR = 1e4
-export const SPACE_SHIP_SCALE_FACTOR = 1e-1
+export const SPACE_SHIP_SCALE_FACTOR = 1e-3 / 5
 
 // export const SUN_X = 145
 // export const SUN_Y = -175
@@ -102,6 +102,8 @@ export const REAL_PLANET_NINE_ROTATIONAL_SPEED = 0.01 // km/s (hypothetical)
 export const REAL_MOON_ROTATIONAL_SPEED = 0.004 // km/s
 
 export const SCALED_SUN_ROTATIONAL_SPEED = 0.1
+
+export const SPACE_SHIP_SPEED = 1/10
 
 export const HINT_WIDTH = 1
 export const HINT_HEIGHT = 1

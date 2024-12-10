@@ -139,6 +139,8 @@ export class SolarSystem {
             let body = this.celestialBodies[bodyName];
             body.rotate();
         }
+
+        this.spaceShip.rotate();
     }
 }
 
